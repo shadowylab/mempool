@@ -8,6 +8,7 @@ use crate::error::Error;
 use crate::response::{AddressStats, DifficultyAdjustment, Prices};
 
 /// Mempool Space client
+#[derive(Debug, Clone)]
 pub struct MempoolClient {
     url: Url,
     client: Client,
