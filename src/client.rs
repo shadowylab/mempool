@@ -4,7 +4,7 @@ use reqwest::{Client, Response};
 use url::Url;
 
 use crate::error::Error;
-use crate::response::Prices;
+use crate::response::{DifficultyAdjustment, Prices};
 
 /// Mempool Space client
 pub struct MempoolClient {
@@ -31,7 +31,14 @@ impl MempoolClient {
         }
     }
 
-    /// Returns bitcoin latest price denominated in main currencies.
+    /// Get details about difficulty adjustment.
+    pub async fn get_difficulty_adjustment(&self) -> Result<DifficultyAdjustment, Error> {
+        let url: Url = self.url.join("/api/v1/difficulty-adjustment")?;
+        let response: Response = self.client.get(url).send().await?;
+        Ok(response.json().await?)
+    }
+
+    /// Get bitcoin latest price denominated in main currencies.
     pub async fn get_prices(&self) -> Result<Prices, Error> {
         let url: Url = self.url.join("/api/v1/prices")?;
         let response: Response = self.client.get(url).send().await?;
