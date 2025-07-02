@@ -1,5 +1,7 @@
 //! Responses
 
+use bitcoin::Amount;
+use bitcoin::address::{Address, NetworkUnchecked};
 use serde::{Deserialize, Serialize};
 
 /// Prices
@@ -63,4 +65,30 @@ pub struct DifficultyAdjustment {
     /// Time offset
     #[serde(rename = "timeOffset")]
     pub time_offset: i64,
+}
+
+/// Bitcoin address statistics
+#[derive(Debug, Serialize, Deserialize)]
+pub struct AddressStats {
+    /// Bitcoin address
+    pub address: Address<NetworkUnchecked>,
+    /// On-chain statistics
+    pub chain_stats: TransactionStats,
+    /// Mempool statistics
+    pub mempool_stats: TransactionStats,
+}
+
+/// Transaction statistics for an address
+#[derive(Debug, Serialize, Deserialize)]
+pub struct TransactionStats {
+    /// Number of funded transaction outputs
+    pub funded_txo_count: u32,
+    /// Total amount of funded transaction outputs
+    pub funded_txo_sum: Amount,
+    /// Number of spent transaction outputs
+    pub spent_txo_count: u32,
+    /// Total amount of spent transaction outputs
+    pub spent_txo_sum: Amount,
+    /// Total number of transactions
+    pub tx_count: u32,
 }

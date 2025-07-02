@@ -1,10 +1,11 @@
 //! Client
 
+use bitcoin::Address;
 use reqwest::{Client, Response};
 use url::Url;
 
 use crate::error::Error;
-use crate::response::{DifficultyAdjustment, Prices};
+use crate::response::{AddressStats, DifficultyAdjustment, Prices};
 
 /// Mempool Space client
 pub struct MempoolClient {
@@ -41,6 +42,16 @@ impl MempoolClient {
     /// Get bitcoin latest price denominated in main currencies.
     pub async fn get_prices(&self) -> Result<Prices, Error> {
         let url: Url = self.url.join("/api/v1/prices")?;
+        let response: Response = self.client.get(url).send().await?;
+        Ok(response.json().await?)
+    }
+
+    /// Get details about an address.
+    pub async fn get_address(&self, address: &Address) -> Result<AddressStats, Error> {
+        let url: Url = self
+            .url
+            .join("/api/address/")?
+            .join(address.to_string().as_str())?;
         let response: Response = self.client.get(url).send().await?;
         Ok(response.json().await?)
     }

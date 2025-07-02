@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use mempoolspace::prelude::*;
 
 #[tokio::main]
@@ -8,4 +10,10 @@ async fn main() {
     // Get prices
     let prices = client.get_prices().await.unwrap();
     println!("{:?}", prices);
+
+    // Get prices
+    let address = Address::from_str("1wiz18xYmhRX6xStj2b9t1rwWX4GKUgpv").unwrap();
+    let address = address.assume_checked();
+    let stats = client.get_address(&address).await.unwrap();
+    println!("{:?}", stats);
 }

@@ -4,6 +4,7 @@
 #![allow(ambiguous_glob_reexports)]
 #![doc(hidden)]
 
+pub use bitcoin::*;
 pub use url::*;
 
 pub use crate::client::*;
