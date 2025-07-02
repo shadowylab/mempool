@@ -68,7 +68,7 @@ pub struct DifficultyAdjustment {
 }
 
 /// Bitcoin address statistics
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct AddressStats {
     /// Bitcoin address
     pub address: Address<NetworkUnchecked>,
@@ -79,7 +79,7 @@ pub struct AddressStats {
 }
 
 /// Transaction statistics for an address
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct TransactionStats {
     /// Number of funded transaction outputs
     pub funded_txo_count: u32,
@@ -91,4 +91,24 @@ pub struct TransactionStats {
     pub spent_txo_sum: Amount,
     /// Total number of transactions
     pub tx_count: u32,
+}
+
+/// Bitcoin fee recommendations in sat/vB
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+pub struct FeeRecommendations {
+    /// Fastest confirmation fee (sat/vB)
+    #[serde(rename = "fastestFee")]
+    pub fastest_fee: u32,
+    /// Fee for confirmation within 30 minutes (sat/vB)
+    #[serde(rename = "halfHourFee")]
+    pub half_hour_fee: u32,
+    /// Fee for confirmation within 1 hour (sat/vB)
+    #[serde(rename = "hourFee")]
+    pub hour_fee: u32,
+    /// Economy fee for slower confirmation (sat/vB)
+    #[serde(rename = "economyFee")]
+    pub economy_fee: u32,
+    /// Minimum fee (sat/vB)
+    #[serde(rename = "minimumFee")]
+    pub minimum_fee: u32,
 }
