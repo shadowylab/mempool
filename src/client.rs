@@ -6,7 +6,8 @@ use url::Url;
 
 use crate::error::Error;
 use crate::response::{
-    AddressStats, BlockInfo, DifficultyAdjustment, FeeRecommendations, MempoolStats, Prices,
+    AddressStats, BlockInfo, DifficultyAdjustment, FeeRecommendations, HashrateStats, MempoolStats,
+    Prices,
 };
 
 /// Mempool Space client
@@ -77,6 +78,13 @@ impl MempoolClient {
             url = url.join(start_height.to_string().as_str())?;
         }
 
+        let response: Response = self.client.get(url).send().await?;
+        Ok(response.json().await?)
+    }
+
+    /// Get network-wide hashrate and difficulty figures over the last 3 days.
+    pub async fn get_hashrate(&self) -> Result<HashrateStats, Error> {
+        let url: Url = self.url.join("/api/v1/mining/hashrate/3d")?;
         let response: Response = self.client.get(url).send().await?;
         Ok(response.json().await?)
     }

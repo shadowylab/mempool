@@ -130,6 +130,42 @@ pub struct BlockInfo {
     pub difficulty: f64,
 }
 
+/// Hashrate stats entry
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize)]
+pub struct HashrateEntry {
+    /// Unix timestamp
+    pub timestamp: u64,
+    /// Average hashrate
+    #[serde(rename = "avgHashrate")]
+    pub avg_hashrate: f64,
+}
+
+/// Difficulty entry
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize)]
+pub struct DifficultyEntry {
+    /// UNIX timestamp
+    pub timestamp: u64,
+    /// Difficulty
+    pub difficulty: f64,
+    /// Block height
+    pub height: u32,
+}
+
+/// Hashrate stats
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
+pub struct HashrateStats {
+    /// Hashrates
+    pub hashrates: Vec<HashrateEntry>,
+    /// Difficulty
+    pub difficulty: Vec<DifficultyEntry>,
+    /// Current hashrate
+    #[serde(rename = "currentHashrate")]
+    pub current_hashrate: f64,
+    /// Current difficulty
+    #[serde(rename = "currentDifficulty")]
+    pub current_difficulty: f64,
+}
+
 /// Bitcoin fee recommendations in sat/vB
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct FeeRecommendations {
