@@ -11,13 +11,18 @@ readme = "README.md"
 keywords = ["bitcoin", "mempool"]
 
 [features]
-default = []
+# Default features
+default = ["rustls"]
+# Enable rust TLS
+rustls = ["reqwest/rustls-tls"]
+# Enable natile TLS (openssl)
+nativetls = ["reqwest/native-tls"]
 # Enable socks proxy
 socks = ["reqwest/socks"]
 
 [dependencies]
 bitcoin = { version = "0.32", default-features = false, features = ["std", "serde"] }
-reqwest = { version = "0.12", features = ["json"] }
+reqwest = { version = "0.12", default-features = false, features = ["json"] }
 serde = { version = "1.0", features = ["derive"] }
 url = "2.5"
 
