@@ -171,33 +171,38 @@ pub struct HashrateStats {
     pub current_difficulty: f64,
 }
 
-/// Bitcoin fee recommendations in sat/vB
+/// Bitcoin fee recommendations
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct FeeRecommendations {
-    /// Fastest confirmation fee (sat/vB)
+    /// Fastest confirmation fee
     #[serde(rename = "fastestFee")]
-    pub fastest_fee: u32,
-    /// Fee for confirmation within 30 minutes (sat/vB)
+    #[serde(with = "deser::fee_rate_u64_serde")]
+    pub fastest_fee: FeeRate,
+    /// Fee for confirmation within 30 minutes
     #[serde(rename = "halfHourFee")]
-    pub half_hour_fee: u32,
-    /// Fee for confirmation within 1 hour (sat/vB)
+    #[serde(with = "deser::fee_rate_u64_serde")]
+    pub half_hour_fee: FeeRate,
+    /// Fee for confirmation within 1 hour
     #[serde(rename = "hourFee")]
-    pub hour_fee: u32,
-    /// Economy fee for slower confirmation (sat/vB)
+    #[serde(with = "deser::fee_rate_u64_serde")]
+    pub hour_fee: FeeRate,
+    /// Economy fee for slower confirmation
     #[serde(rename = "economyFee")]
-    pub economy_fee: u32,
-    /// Minimum fee (sat/vB)
+    #[serde(with = "deser::fee_rate_u64_serde")]
+    pub economy_fee: FeeRate,
+    /// Minimum fee
     #[serde(rename = "minimumFee")]
-    pub minimum_fee: u32,
+    #[serde(with = "deser::fee_rate_u64_serde")]
+    pub minimum_fee: FeeRate,
 }
 
 /// Fee histogram entry representing transactions at a specific fee rate
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct FeeHistogramEntry {
-    /// Fee rate in sat/vB (converted from API)
-    #[serde(with = "deser::fee_rate_serde")]
+    /// Fee rate (converted from API)
+    #[serde(with = "deser::fee_rate_f64_serde")]
     pub fee_rate: FeeRate,
-    /// Virtual size of transactions at this fee rate (vB)
+    /// Virtual size of transactions at this fee rate
     #[serde(with = "deser::weight_serde")]
     pub vsize: Weight,
 }
@@ -241,7 +246,7 @@ pub struct MempoolBlockFees {
     pub total_fees: Amount,
     /// Median fee rate
     #[serde(rename = "medianFee")]
-    #[serde(with = "deser::fee_rate_serde")]
+    #[serde(with = "deser::fee_rate_f64_serde")]
     pub median_fee: FeeRate,
     /// Fee rate range
     #[serde(rename = "feeRange")]
@@ -286,6 +291,25 @@ mod tests {
                 nonce: 3580664066,
                 bits: 386521239,
                 difficulty: 28587155782195.14,
+            }
+        );
+    }
+
+    #[test]
+    fn test_fee_recommendations_deserialization() {
+        let json_data =
+            r#"{"fastestFee":10,"halfHourFee":8,"hourFee":5,"economyFee":2,"minimumFee":1}"#;
+
+        let fees: FeeRecommendations = serde_json::from_str(json_data).unwrap();
+
+        assert_eq!(
+            fees,
+            FeeRecommendations {
+                fastest_fee: FeeRate::from_sat_per_vb_unchecked(10),
+                half_hour_fee: FeeRate::from_sat_per_vb_unchecked(8),
+                hour_fee: FeeRate::from_sat_per_vb_unchecked(5),
+                economy_fee: FeeRate::from_sat_per_vb_unchecked(2),
+                minimum_fee: FeeRate::from_sat_per_vb_unchecked(1),
             }
         );
     }
@@ -344,7 +368,7 @@ mod tests {
         assert_eq!(block_fee.block_v_size, 746096.5);
         assert_eq!(block_fee.n_tx, 863);
         assert_eq!(block_fee.total_fees.to_sat(), 8875608);
-        assert_eq!(block_fee.median_fee.to_sat_per_kwu(), 10796);
+        assert_eq!(block_fee.median_fee.to_sat_per_vb_ceil(), 10);
         assert_eq!(block_fee.fee_range.len(), 3);
         assert_eq!(block_fee.fee_range[0].to_sat_per_kwu(), 1000);
         assert_eq!(block_fee.fee_range[1].to_sat_per_kwu(), 2424);
