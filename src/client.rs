@@ -6,8 +6,8 @@ use url::Url;
 
 use crate::error::Error;
 use crate::response::{
-    AddressStats, BlockInfo, DifficultyAdjustment, FeeRecommendations, HashrateStats, MempoolStats,
-    Prices,
+    AddressStats, BlockInfo, DifficultyAdjustment, FeeRecommendations, HashrateStats,
+    MempoolBlockFees, MempoolStats, Prices,
 };
 
 /// Mempool Space client
@@ -99,6 +99,13 @@ impl MempoolClient {
     /// Get current mempool backlog statistics.
     pub async fn get_mempool(&self) -> Result<MempoolStats, Error> {
         let url: Url = self.url.join("/api/mempool")?;
+        let response: Response = self.client.get(url).send().await?;
+        Ok(response.json().await?)
+    }
+
+    /// Get current mempool as projected blocks.
+    pub async fn get_mempool_blocks_fees(&self) -> Result<Vec<MempoolBlockFees>, Error> {
+        let url: Url = self.url.join("/api/v1/fees/mempool-blocks")?;
         let response: Response = self.client.get(url).send().await?;
         Ok(response.json().await?)
     }

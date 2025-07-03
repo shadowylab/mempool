@@ -42,6 +42,40 @@ pub(crate) mod fee_rate_serde {
     }
 }
 
+pub(crate) mod fee_rate_vec_serde {
+    use bitcoin::FeeRate;
+    use serde::{Deserialize, Deserializer, Serialize, Serializer};
+
+    pub fn serialize<S>(fee_rate: &[FeeRate], serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let fee_rates_f64: Vec<f64> = fee_rate
+            .iter()
+            .map(|fr| fr.to_sat_per_kwu() as f64 / 1000.0)
+            .collect();
+
+        fee_rates_f64.serialize(serializer)
+    }
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<Vec<FeeRate>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let fee_rates_f64: Vec<f64> = Vec::deserialize(deserializer)?;
+
+        let fee_rates = fee_rates_f64
+            .into_iter()
+            .map(|sat_per_vb| {
+                let sat_per_kwu: u64 = (sat_per_vb * 1000.0) as u64;
+                FeeRate::from_sat_per_kwu(sat_per_kwu)
+            })
+            .collect();
+
+        Ok(fee_rates)
+    }
+}
+
 pub(crate) mod fee_histogram_serde {
     use bitcoin::{FeeRate, Weight};
     use serde::{Deserialize, Deserializer, Serialize, Serializer};

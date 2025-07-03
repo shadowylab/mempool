@@ -211,6 +211,31 @@ pub struct MempoolStats {
     pub fee_histogram: Vec<FeeHistogramEntry>,
 }
 
+/// Mempool block fees
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
+pub struct MempoolBlockFees {
+    /// Block size
+    #[serde(rename = "blockSize")]
+    pub block_size: u64,
+    /// Block vSize
+    #[serde(rename = "blockVSize")]
+    pub block_v_size: f64,
+    /// Number of transactions
+    #[serde(rename = "nTx")]
+    pub n_tx: u64,
+    /// Total fees
+    #[serde(rename = "totalFees")]
+    pub total_fees: Amount,
+    /// Median fee rate
+    #[serde(rename = "medianFee")]
+    #[serde(with = "deser::fee_rate_serde")]
+    pub median_fee: FeeRate,
+    /// Fee rate range
+    #[serde(rename = "feeRange")]
+    #[serde(with = "deser::fee_rate_vec_serde")]
+    pub fee_range: Vec<FeeRate>,
+}
+
 #[cfg(test)]
 mod tests {
     use std::str::FromStr;
@@ -284,6 +309,33 @@ mod tests {
         // Serialize
         let serialized = serde_json::to_string(&stats).unwrap();
         assert_eq!(serialized, json_data);
+    }
+
+    #[test]
+    fn test_mempool_block_fees_deserialization() {
+        let json_data = r#"{
+    "blockSize": 873046,
+    "blockVSize": 746096.5,
+    "nTx": 863,
+    "totalFees": 8875608,
+    "medianFee": 10.79646017699115,
+    "feeRange": [
+      1,
+      2.4242424242424243,
+      8.107816711590296
+    ]
+  }"#;
+
+        let block_fee: MempoolBlockFees = serde_json::from_str(json_data).unwrap();
+        assert_eq!(block_fee.block_size, 873046);
+        assert_eq!(block_fee.block_v_size, 746096.5);
+        assert_eq!(block_fee.n_tx, 863);
+        assert_eq!(block_fee.total_fees.to_sat(), 8875608);
+        assert_eq!(block_fee.median_fee.to_sat_per_kwu(), 10796);
+        assert_eq!(block_fee.fee_range.len(), 3);
+        assert_eq!(block_fee.fee_range[0].to_sat_per_kwu(), 1000);
+        assert_eq!(block_fee.fee_range[1].to_sat_per_kwu(), 2424);
+        assert_eq!(block_fee.fee_range[2].to_sat_per_kwu(), 8107);
     }
 
     #[test]
