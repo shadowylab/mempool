@@ -207,13 +207,21 @@ pub struct FeeHistogramEntry {
 pub struct MempoolStats {
     /// Number of transactions in mempool
     pub count: u32,
-    /// Total virtual size of all transactions in mempool (vB)
+    /// Total virtual size of all transactions in mempool
     pub vsize: Weight,
     /// Total fees of all transactions in mempool
     pub total_fee: Amount,
     /// Fee histogram distribution
     #[serde(with = "deser::fee_histogram_serde")]
     pub fee_histogram: Vec<FeeHistogramEntry>,
+}
+
+impl MempoolStats {
+    /// Total size (MB) of all transactions in mempool
+    pub fn size_mb(&self) -> f64 {
+        let vbyte: u64 = self.vsize.to_vbytes_ceil();
+        vbyte as f64 / 1_000_000.0
+    }
 }
 
 /// Mempool block fees
@@ -354,5 +362,17 @@ mod tests {
 
         // Should be close due to precision loss from float->int->float conversion
         assert!((converted_back - 8.687).abs() < 0.001);
+    }
+
+    #[test]
+    fn test_mempool_size_conversion_to_mb() {
+        let stats = MempoolStats {
+            count: 1,
+            vsize: Weight::from_vb_unchecked(2345565),
+            total_fee: Amount::from_sat(1000),
+            fee_histogram: vec![],
+        };
+
+        assert_eq!(stats.size_mb(), 2.345565);
     }
 }
