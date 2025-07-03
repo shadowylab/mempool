@@ -6,7 +6,7 @@ use url::Url;
 
 use crate::error::Error;
 use crate::response::{
-    AddressStats, DifficultyAdjustment, FeeRecommendations, MempoolStats, Prices,
+    AddressStats, BlockInfo, DifficultyAdjustment, FeeRecommendations, MempoolStats, Prices,
 };
 
 /// Mempool Space client
@@ -62,6 +62,21 @@ impl MempoolClient {
     /// Get the height of the last block.
     pub async fn get_block_tip_height(&self) -> Result<u32, Error> {
         let url: Url = self.url.join("/api/blocks/tip/height")?;
+        let response: Response = self.client.get(url).send().await?;
+        Ok(response.json().await?)
+    }
+
+    /// Get the details on the past 10 blocks.
+    ///
+    /// If `start_height` is specified, the 10 blocks before (and including) `start_height` are returned.
+    pub async fn get_blocks(&self, start_height: Option<u32>) -> Result<Vec<BlockInfo>, Error> {
+        let mut url: Url = self.url.join("/api/blocks")?;
+
+        // Add start height, if any.
+        if let Some(start_height) = start_height {
+            url = url.join(start_height.to_string().as_str())?;
+        }
+
         let response: Response = self.client.get(url).send().await?;
         Ok(response.json().await?)
     }

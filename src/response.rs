@@ -1,7 +1,7 @@
 //! Responses
 
 use bitcoin::address::{Address, NetworkUnchecked};
-use bitcoin::{Amount, FeeRate, Weight};
+use bitcoin::{Amount, BlockHash, FeeRate, TxMerkleNode, Weight};
 use serde::{Deserialize, Serialize};
 
 use crate::deser;
@@ -10,7 +10,8 @@ use crate::deser;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct Prices {
     /// Timestamp
-    pub time: u64,
+    #[serde(rename = "time")]
+    pub timestamp: u64,
     /// USD
     #[serde(rename = "USD")]
     pub usd: u32,
@@ -95,6 +96,40 @@ pub struct TransactionStats {
     pub tx_count: u32,
 }
 
+/// Block Info
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize)]
+pub struct BlockInfo {
+    /// Block hash
+    pub id: BlockHash,
+    /// Block height
+    pub height: u32,
+    /// Block version
+    pub version: u32,
+    /// UNIX timestamp
+    pub timestamp: u64,
+    /// Number of transactions in the block
+    pub tx_count: u32,
+    /// Block size in bytes
+    pub size: u32,
+    /// Block weight
+    #[serde(with = "deser::weight_serde")]
+    pub weight: Weight,
+    /// Merkle root hash
+    pub merkle_root: TxMerkleNode,
+    /// Previous block hash
+    #[serde(rename = "previousblockhash")]
+    pub previous_block_hash: BlockHash,
+    /// Median time of the block
+    #[serde(rename = "mediantime")]
+    pub median_time: u64,
+    /// Block nonce
+    pub nonce: u32,
+    /// Bits (difficulty target)
+    pub bits: u32,
+    /// Difficulty
+    pub difficulty: f64,
+}
+
 /// Bitcoin fee recommendations in sat/vB
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct FeeRecommendations {
@@ -142,7 +177,44 @@ pub struct MempoolStats {
 
 #[cfg(test)]
 mod tests {
+    use std::str::FromStr;
+
     use super::*;
+
+    #[test]
+    fn test_block_info_deserialization() {
+        let json_data = r#"{"id":"0000000000000000000384f28cb3b9cf4377a39cfd6c29ae9466951de38c0529","height":730000,"version":536870912,"timestamp":1648829449,"tx_count":1627,"size":1210916,"weight":3993515,"merkle_root":"efa344bcd6c0607f93b709515dd6dc5496178112d680338ebea459e3de7b4fbc","previousblockhash":"00000000000000000008b6f6fb83f8d74512ef1e0af29e642dd20daddd7d318f","mediantime":1648827418,"nonce":3580664066,"bits":386521239,"difficulty":28587155782195.14}"#;
+
+        let block_info: BlockInfo = serde_json::from_str(json_data).unwrap();
+
+        assert_eq!(
+            block_info,
+            BlockInfo {
+                id: BlockHash::from_str(
+                    "0000000000000000000384f28cb3b9cf4377a39cfd6c29ae9466951de38c0529"
+                )
+                .unwrap(),
+                height: 730_000,
+                version: 536870912,
+                timestamp: 1648829449,
+                tx_count: 1627,
+                size: 1210916,
+                weight: Weight::from_vb_unchecked(3993515),
+                merkle_root: TxMerkleNode::from_str(
+                    "efa344bcd6c0607f93b709515dd6dc5496178112d680338ebea459e3de7b4fbc"
+                )
+                .unwrap(),
+                previous_block_hash: BlockHash::from_str(
+                    "00000000000000000008b6f6fb83f8d74512ef1e0af29e642dd20daddd7d318f"
+                )
+                .unwrap(),
+                median_time: 1648827418,
+                nonce: 3580664066,
+                bits: 386521239,
+                difficulty: 28587155782195.14,
+            }
+        );
+    }
 
     #[test]
     fn test_mempool_stats_deser() {
