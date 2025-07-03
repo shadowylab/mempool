@@ -67,8 +67,9 @@ impl MempoolClient {
     /// let client = MempoolClient::new(url);
     /// # let _client = client;
     /// ```
+    #[inline]
     pub fn new(url: Url) -> Self {
-        Self::from_client(url, Client::new())
+        Self::builder(url).build().expect("Failed to build client")
     }
 
     /// Construct a client builder
