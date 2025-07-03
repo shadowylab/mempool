@@ -7,6 +7,10 @@ async fn main() {
     let url = Url::parse("https://mempool.space").unwrap();
     let client = MempoolClient::new(url);
 
+    // Get block tip height
+    let height = client.get_block_tip_height().await.unwrap();
+    println!("Height: {height}");
+
     // Get prices
     let prices = client.get_prices().await.unwrap();
     println!("{:?}", prices);

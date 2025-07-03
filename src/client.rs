@@ -57,6 +57,13 @@ impl MempoolClient {
         Ok(response.json().await?)
     }
 
+    /// Get the height of the last block.
+    pub async fn get_block_tip_height(&self) -> Result<u32, Error> {
+        let url: Url = self.url.join("/api/blocks/tip/height")?;
+        let response: Response = self.client.get(url).send().await?;
+        Ok(response.json().await?)
+    }
+
     /// Get currently suggested fees for new transactions.
     pub async fn get_recommended_fees(&self) -> Result<FeeRecommendations, Error> {
         let url: Url = self.url.join("/api/v1/fees/recommended")?;
