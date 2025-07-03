@@ -11,6 +11,10 @@ async fn main() {
     let height = client.get_block_tip_height().await.unwrap();
     println!("Height: {height}");
 
+    // Get mempool stats
+    let stats = client.get_mempool().await.unwrap();
+    println!("{stats:?}");
+
     // Get prices
     let prices = client.get_prices().await.unwrap();
     println!("{:?}", prices);

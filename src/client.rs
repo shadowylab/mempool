@@ -5,7 +5,9 @@ use reqwest::{Client, Response};
 use url::Url;
 
 use crate::error::Error;
-use crate::response::{AddressStats, DifficultyAdjustment, FeeRecommendations, Prices};
+use crate::response::{
+    AddressStats, DifficultyAdjustment, FeeRecommendations, MempoolStats, Prices,
+};
 
 /// Mempool Space client
 #[derive(Debug, Clone)]
@@ -67,6 +69,13 @@ impl MempoolClient {
     /// Get currently suggested fees for new transactions.
     pub async fn get_recommended_fees(&self) -> Result<FeeRecommendations, Error> {
         let url: Url = self.url.join("/api/v1/fees/recommended")?;
+        let response: Response = self.client.get(url).send().await?;
+        Ok(response.json().await?)
+    }
+
+    /// Get current mempool backlog statistics.
+    pub async fn get_mempool(&self) -> Result<MempoolStats, Error> {
+        let url: Url = self.url.join("/api/mempool")?;
         let response: Response = self.client.get(url).send().await?;
         Ok(response.json().await?)
     }
