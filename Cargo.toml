@@ -2,6 +2,13 @@
 name = "mempoolspace"
 version = "0.1.0"
 edition = "2024"
+description = "A Rust client library for interacting with the Mempool Space APIs."
+authors = ["Yuki Kishimoto <yukikishimoto@protonmail.com>"]
+homepage = "https://github.com/shadowylab/mempool"
+repository = "https://github.com/shadowylab/mempool.git"
+license = "MIT"
+readme = "README.md"
+keywords = ["bitcoin", "mempool"]
 
 [features]
 default = []
