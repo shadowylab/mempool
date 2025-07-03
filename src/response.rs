@@ -134,6 +134,7 @@ pub struct BlockInfo {
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub struct HashrateEntry {
     /// Unix timestamp
+    #[serde(alias = "time")]
     pub timestamp: u64,
     /// Average hashrate
     #[serde(rename = "avgHashrate")]
@@ -144,11 +145,15 @@ pub struct HashrateEntry {
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub struct DifficultyEntry {
     /// UNIX timestamp
+    #[serde(alias = "time")]
     pub timestamp: u64,
-    /// Difficulty
-    pub difficulty: f64,
     /// Block height
     pub height: u32,
+    /// Difficulty
+    pub difficulty: f64,
+    /// Adjustment
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub adjustment: Option<f32>,
 }
 
 /// Hashrate stats

@@ -10,6 +10,43 @@ use crate::response::{
     MempoolBlockFees, MempoolStats, Prices,
 };
 
+/// Hashrate time period
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum HashratePeriod {
+    /// 3 days
+    #[default]
+    ThreeDays,
+    /// 1 month
+    OneMonth,
+    /// 3 months
+    ThreeMonths,
+    /// 6 months
+    SixMonths,
+    /// 1 year
+    OneYear,
+    /// 2 years
+    TwoYears,
+    /// 3 years
+    ThreeYears,
+    /// All time
+    AllTime,
+}
+
+impl HashratePeriod {
+    fn as_str(&self) -> &str {
+        match self {
+            Self::ThreeDays => "3d",
+            Self::OneMonth => "1m",
+            Self::ThreeMonths => "3m",
+            Self::SixMonths => "6m",
+            Self::OneYear => "1y",
+            Self::TwoYears => "2y",
+            Self::ThreeYears => "3y",
+            Self::AllTime => "all_time",
+        }
+    }
+}
+
 /// Mempool Space client
 #[derive(Debug, Clone)]
 pub struct MempoolClient {
@@ -83,8 +120,11 @@ impl MempoolClient {
     }
 
     /// Get network-wide hashrate and difficulty figures over the last 3 days.
-    pub async fn get_hashrate(&self) -> Result<HashrateStats, Error> {
-        let url: Url = self.url.join("/api/v1/mining/hashrate/3d")?;
+    pub async fn get_hashrate(&self, period: HashratePeriod) -> Result<HashrateStats, Error> {
+        let url: Url = self
+            .url
+            .join("/api/v1/mining/hashrate/")?
+            .join(period.as_str())?;
         let response: Response = self.client.get(url).send().await?;
         Ok(response.json().await?)
     }
