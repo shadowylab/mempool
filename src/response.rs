@@ -227,6 +227,22 @@ impl MempoolStats {
         let vbyte: u64 = self.vsize.to_vbytes_ceil();
         vbyte as f64 / 1_000_000.0
     }
+
+    /// Calculate average fee rate
+    pub fn avg_fee_rate(&self) -> FeeRate {
+        if self.fee_histogram.is_empty() {
+            return FeeRate::BROADCAST_MIN;
+        }
+
+        let fee_rate_sum: u64 = self
+            .fee_histogram
+            .iter()
+            .map(|e| e.fee_rate.to_sat_per_kwu())
+            .sum();
+        let total: u64 = self.fee_histogram.len() as u64;
+        let fee_rate_avg: u64 = fee_rate_sum / total;
+        FeeRate::from_sat_per_kwu(fee_rate_avg)
+    }
 }
 
 /// Mempool block fees
@@ -398,5 +414,37 @@ mod tests {
         };
 
         assert_eq!(stats.size_mb(), 2.345565);
+    }
+
+    #[test]
+    fn test_mempool_avg_fee_rate() {
+        let stats = MempoolStats {
+            count: 1,
+            vsize: Weight::from_vb_unchecked(2345565),
+            total_fee: Amount::from_sat(1000),
+            fee_histogram: vec![],
+        };
+        assert_eq!(stats.avg_fee_rate(), FeeRate::from_sat_per_vb_unchecked(1));
+
+        let stats = MempoolStats {
+            count: 1,
+            vsize: Weight::from_vb_unchecked(2345565),
+            total_fee: Amount::from_sat(1000),
+            fee_histogram: vec![
+                FeeHistogramEntry {
+                    fee_rate: FeeRate::from_sat_per_vb_unchecked(18),
+                    vsize: Weight::from_vb_unchecked(1000),
+                },
+                FeeHistogramEntry {
+                    fee_rate: FeeRate::from_sat_per_vb_unchecked(8),
+                    vsize: Weight::from_vb_unchecked(1000),
+                },
+                FeeHistogramEntry {
+                    fee_rate: FeeRate::from_sat_per_vb_unchecked(4),
+                    vsize: Weight::from_vb_unchecked(1000),
+                },
+            ],
+        };
+        assert_eq!(stats.avg_fee_rate(), FeeRate::from_sat_per_vb_unchecked(10));
     }
 }
