@@ -4,6 +4,7 @@ use bitcoin::Address;
 use reqwest::{Client, Response};
 use url::Url;
 
+use crate::builder::MempoolClientBuilder;
 use crate::error::Error;
 use crate::response::{
     AddressStats, BlockInfo, DifficultyAdjustment, FeeRecommendations, HashrateStats,
@@ -67,10 +68,19 @@ impl MempoolClient {
     /// # let _client = client;
     /// ```
     pub fn new(url: Url) -> Self {
-        Self {
-            url,
-            client: Client::new(),
-        }
+        Self::from_client(url, Client::new())
+    }
+
+    /// Construct a client builder
+    #[inline]
+    pub fn builder(url: Url) -> MempoolClientBuilder {
+        MempoolClientBuilder::new(url)
+    }
+
+    /// Construct new with a custom reqwest [`Client`].
+    #[inline]
+    pub fn from_client(url: Url, client: Client) -> Self {
+        Self { client, url }
     }
 
     /// Get details about difficulty adjustment.

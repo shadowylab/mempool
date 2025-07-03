@@ -19,12 +19,17 @@ jobs:
   check:
     name: Check crate
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        crate:
+          - -p mempoolspace
+          - -p mempoolspace --features socks
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Check
-        run: cargo check
+        run: cargo check -p ${{ matrix.crate }}
       - name: Clippy
-        run: cargo clippy -- -D warnings
+        run: cargo clippy -p ${{ matrix.crate }} -- -D warnings
       - name: Test
-        run: cargo test
+        run: cargo test -p ${{ matrix.crate }}

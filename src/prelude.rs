@@ -7,6 +7,7 @@
 pub use bitcoin::*;
 pub use url::*;
 
+pub use crate::builder::*;
 pub use crate::client::*;
 pub use crate::error::*;
 pub use crate::response::*;

@@ -3,7 +3,10 @@ name = "mempoolspace"
 version = "0.1.0"
 edition = "2024"
 
-# TODO: add socks feature
+[features]
+default = []
+# Enable socks proxy
+socks = ["reqwest/socks"]
 
 [dependencies]
 bitcoin = { version = "0.32", default-features = false, features = ["std", "serde"] }
