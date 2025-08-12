@@ -21,15 +21,15 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        crate:
-          - -p mempoolspace
-          - -p mempoolspace --features socks
+        args:
+          - ""
+          - "--features socks"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Check
-        run: cargo check -p ${{ matrix.crate }}
+        run: cargo check ${{ matrix.args }}
       - name: Clippy
-        run: cargo clippy -p ${{ matrix.crate }} -- -D warnings
+        run: cargo clippy ${{ matrix.args }} -- -D warnings
       - name: Test
-        run: cargo test -p ${{ matrix.crate }}
+        run: cargo test ${{ matrix.args }}
