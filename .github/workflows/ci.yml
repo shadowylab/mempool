@@ -23,8 +23,9 @@ jobs:
     strategy:
       matrix:
         args:
-          - ""
-          - "--features socks"
+          - ""                                              # Default features
+          - "--no-default-features --features nativetls"    # Native TLS feature
+          - "--features socks"                              # Socks feature
     steps:
       - name: Checkout
         uses: actions/checkout@v4
