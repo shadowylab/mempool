@@ -1,5 +1,8 @@
 //! Responses
 
+use std::cmp::Ordering;
+use std::collections::BTreeSet;
+
 use bitcoin::address::{Address, NetworkUnchecked};
 use bitcoin::{Amount, BlockHash, FeeRate, TxMerkleNode, Weight};
 use serde::{Deserialize, Serialize};
@@ -131,7 +134,7 @@ pub struct BlockInfo {
 }
 
 /// Hashrate stats entry
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct HashrateEntry {
     /// Unix timestamp
     #[serde(alias = "time")]
@@ -141,8 +144,28 @@ pub struct HashrateEntry {
     pub avg_hashrate: f64,
 }
 
+impl PartialEq for HashrateEntry {
+    fn eq(&self, other: &Self) -> bool {
+        self.timestamp == other.timestamp
+    }
+}
+
+impl Eq for HashrateEntry {}
+
+impl PartialOrd for HashrateEntry {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for HashrateEntry {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.timestamp.cmp(&other.timestamp)
+    }
+}
+
 /// Difficulty entry
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct DifficultyEntry {
     /// UNIX timestamp
     #[serde(alias = "time")]
@@ -156,13 +179,33 @@ pub struct DifficultyEntry {
     pub adjustment: Option<f32>,
 }
 
+impl PartialEq for DifficultyEntry {
+    fn eq(&self, other: &Self) -> bool {
+        self.timestamp == other.timestamp
+    }
+}
+
+impl Eq for DifficultyEntry {}
+
+impl PartialOrd for DifficultyEntry {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for DifficultyEntry {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.timestamp.cmp(&other.timestamp)
+    }
+}
+
 /// Hashrate stats
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub struct HashrateStats {
     /// Hashrates
-    pub hashrates: Vec<HashrateEntry>,
+    pub hashrates: BTreeSet<HashrateEntry>,
     /// Difficulty
-    pub difficulty: Vec<DifficultyEntry>,
+    pub difficulty: BTreeSet<DifficultyEntry>,
     /// Current hashrate
     #[serde(rename = "currentHashrate")]
     pub current_hashrate: f64,
