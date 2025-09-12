@@ -12,13 +12,15 @@ keywords = ["bitcoin", "mempool"]
 
 [features]
 # Default features
-default = ["rustls"]
+default = ["rustls", "ws"]
 # Enable rust TLS
 rustls = ["reqwest/rustls-tls"]
 # Enable natile TLS (openssl)
 nativetls = ["reqwest/native-tls"]
 # Enable socks proxy
 socks = ["reqwest/socks"]
+# Enable WebSocket client
+ws = ["dep:futures-util", "dep:serde_json", "dep:tokio", "dep:tokio-tungstenite", "dep:tracing"]
 
 [dependencies]
 bitcoin = { version = "0.32", default-features = false, features = ["std", "serde"] }
@@ -26,9 +28,17 @@ reqwest = { version = "0.12", default-features = false, features = ["json"] }
 serde = { version = "1.0", features = ["derive"] }
 url = "2.5"
 
+# WebSocket
+futures-util = { version = "0.3", optional = true }
+serde_json = { version = "1.0", optional = true }
+tokio = { version = "1", features = ["sync", "time"], optional = true }
+tokio-tungstenite = { version = "0.27", features = ["rustls-tls-webpki-roots"], optional = true }
+tracing = { version = "0.1", optional = true }
+
 [dev-dependencies]
 serde_json = "1.0"
 tokio = { version = "1.46", features = ["macros", "rt-multi-thread"] }
 
 [[example]]
 name = "mempool"
+required-features = ["ws"]

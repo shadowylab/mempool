@@ -313,6 +313,60 @@ pub struct MempoolBlockFees {
     pub fee_range: Vec<FeeRate>,
 }
 
+/// Mempool info
+#[cfg(feature = "ws")]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize)]
+pub struct MempoolInfo {
+    /// Loaded
+    pub loaded: bool,
+    /// Mempool size
+    pub size: usize,
+    /// Bytes
+    pub bytes: usize,
+    /// Usage
+    pub usage: usize,
+    /// Total fee
+    pub total_fee: f64,
+    /// Max mempool
+    #[serde(rename = "maxmempool")]
+    pub max_mempool: usize,
+    /// Mempool min fee
+    #[serde(rename = "mempoolminfee")]
+    pub mempool_min_fee: f64,
+    /// Min relay tx fee
+    #[serde(rename = "minrelaytxfee")]
+    pub min_relay_tx_fee: f64,
+    /// Incremental relay fee
+    #[serde(rename = "incrementalrelayfee")]
+    pub incremental_relay_fee: f64,
+    /// Unbroadcast count
+    #[serde(rename = "unbroadcastcount")]
+    pub unbroadcast_count: usize,
+    /// Full RBF
+    #[serde(rename = "fullrbf")]
+    pub full_rbf: bool,
+}
+
+/// Mempool subscription response
+#[cfg(feature = "ws")]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize)]
+pub struct MempoolSubscriptionResponse {
+    /// vByte/sec
+    #[serde(rename = "vBytesPerSecond")]
+    pub vbyte_per_second: Option<usize>,
+    /// Mempool blocks
+    #[serde(rename = "mempool-blocks")]
+    pub mempool_blocks: Option<Vec<MempoolBlockFees>>,
+    /// Mempool info
+    #[serde(rename = "mempoolInfo")]
+    pub mempool_info: Option<MempoolInfo>,
+    /// Fees
+    pub fees: Option<FeeRecommendations>,
+    /// Difficulty adjustment
+    #[serde(rename = "da")]
+    pub difficulty_adjustment: Option<DifficultyAdjustment>,
+}
+
 #[cfg(test)]
 mod tests {
     use std::str::FromStr;

@@ -1,6 +1,7 @@
 use std::str::FromStr;
 
 use mempoolspace::prelude::*;
+use tokio::sync::mpsc::UnboundedReceiver;
 
 #[tokio::main]
 async fn main() {
@@ -28,4 +29,26 @@ async fn main() {
     // Get recommended fees
     let fees = client.get_recommended_fees().await.unwrap();
     println!("{:?}", fees);
+
+    // Subscribe
+    let req = MempoolSubscriptionRequest::LiveData {
+        action: LiveDataAction::Want,
+        data: vec![LiveDataType::Stats],
+    };
+    let sub = client.subscribe(req).await.unwrap();
+
+    tokio::select! {
+        _ = sub.worker => {
+            println!("Worker exited");
+        },
+        _ = handle_messages(sub.receiver) => {
+            println!("Receiver exited");
+        }
+    }
+}
+
+async fn handle_messages(mut rx: UnboundedReceiver<MempoolSubscriptionResponse>) {
+    while let Some(message) = rx.recv().await {
+        println!("{message:?}");
+    }
 }

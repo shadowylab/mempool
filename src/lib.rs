@@ -11,3 +11,5 @@ mod deser;
 pub mod error;
 pub mod prelude;
 pub mod response;
+#[cfg(feature = "ws")]
+pub mod websocket;
