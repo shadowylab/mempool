@@ -10,6 +10,8 @@ use crate::response::{
     AddressStats, BlockInfo, DifficultyAdjustment, FeeRecommendations, HashrateStats,
     MempoolBlockFees, MempoolStats, Prices,
 };
+#[cfg(feature = "ws")]
+use crate::websocket::{self, MempoolSubscription, MempoolSubscriptionRequest};
 
 /// Hashrate time period
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -159,5 +161,17 @@ impl MempoolClient {
         let url: Url = self.url.join("/api/v1/fees/mempool-blocks")?;
         let response: Response = self.client.get(url).send().await?;
         Ok(response.json().await?)
+    }
+
+    /// Subscribe to mempool space websocket.
+    ///
+    /// This creates a new websocket connection!
+    #[inline]
+    #[cfg(feature = "ws")]
+    pub async fn subscribe(
+        &self,
+        req: MempoolSubscriptionRequest,
+    ) -> Result<MempoolSubscription, Error> {
+        websocket::subscribe(&self.url, req).await
     }
 }

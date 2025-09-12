@@ -11,4 +11,6 @@ pub use crate::builder::*;
 pub use crate::client::*;
 pub use crate::error::*;
 pub use crate::response::*;
+#[cfg(feature = "ws")]
+pub use crate::websocket::*;
 pub use crate::*;
