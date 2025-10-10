@@ -1,6 +1,6 @@
 //! Client
 
-use bitcoin::Address;
+use bitcoin::{Address, BlockHash};
 use reqwest::{Client, Response};
 use url::Url;
 
@@ -113,6 +113,16 @@ impl MempoolClient {
     /// Get the height of the last block.
     pub async fn get_block_tip_height(&self) -> Result<u32, Error> {
         let url: Url = self.url.join("/api/blocks/tip/height")?;
+        let response: Response = self.client.get(url).send().await?;
+        Ok(response.json().await?)
+    }
+
+    /// Get the block information
+    pub async fn get_block(&self, hash: BlockHash) -> Result<BlockInfo, Error> {
+        let url: Url = self
+            .url
+            .join("/api/block/")?
+            .join(hash.to_string().as_str())?;
         let response: Response = self.client.get(url).send().await?;
         Ok(response.json().await?)
     }
