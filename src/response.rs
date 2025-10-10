@@ -155,7 +155,7 @@ pub struct BlockExtras {
     pub total_fees: Amount,
     /// Median fee rate
     #[serde(rename = "medianFee")]
-    #[serde(with = "deser::fee_rate_u64_serde")]
+    #[serde(with = "deser::fee_rate_f64_serde")]
     pub median_fee: FeeRate,
     /// Fee rate range
     #[serde(rename = "feeRange")]
@@ -170,7 +170,7 @@ pub struct BlockExtras {
     pub avg_fee: Amount,
     /// Average fee rate
     #[serde(rename = "avgFeeRate")]
-    #[serde(with = "deser::fee_rate_u64_serde")]
+    #[serde(with = "deser::fee_rate_f64_serde")]
     pub avg_fee_rate: FeeRate,
     /// Raw coinbase transaction hex
     #[serde(rename = "coinbaseRaw")]
@@ -368,23 +368,23 @@ pub struct HashrateStats {
 pub struct FeeRecommendations {
     /// Fastest confirmation fee
     #[serde(rename = "fastestFee")]
-    #[serde(with = "deser::fee_rate_u64_serde")]
+    #[serde(with = "deser::fee_rate_f64_serde")]
     pub fastest_fee: FeeRate,
     /// Fee for confirmation within 30 minutes
     #[serde(rename = "halfHourFee")]
-    #[serde(with = "deser::fee_rate_u64_serde")]
+    #[serde(with = "deser::fee_rate_f64_serde")]
     pub half_hour_fee: FeeRate,
     /// Fee for confirmation within 1 hour
     #[serde(rename = "hourFee")]
-    #[serde(with = "deser::fee_rate_u64_serde")]
+    #[serde(with = "deser::fee_rate_f64_serde")]
     pub hour_fee: FeeRate,
     /// Economy fee for slower confirmation
     #[serde(rename = "economyFee")]
-    #[serde(with = "deser::fee_rate_u64_serde")]
+    #[serde(with = "deser::fee_rate_f64_serde")]
     pub economy_fee: FeeRate,
     /// Minimum fee
     #[serde(rename = "minimumFee")]
-    #[serde(with = "deser::fee_rate_u64_serde")]
+    #[serde(with = "deser::fee_rate_f64_serde")]
     pub minimum_fee: FeeRate,
 }
 

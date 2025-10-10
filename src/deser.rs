@@ -44,27 +44,6 @@ pub mod optional_weight_serde {
     }
 }
 
-pub(crate) mod fee_rate_u64_serde {
-    use bitcoin::FeeRate;
-    use serde::{Deserialize, Deserializer, Serializer};
-
-    pub fn serialize<S>(fee_rate: &FeeRate, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let sat_per_vb: u64 = fee_rate.to_sat_per_vb_ceil();
-        serializer.serialize_u64(sat_per_vb)
-    }
-
-    pub fn deserialize<'de, D>(deserializer: D) -> Result<FeeRate, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let sat_per_vb = u64::deserialize(deserializer)?;
-        Ok(FeeRate::from_sat_per_vb_unchecked(sat_per_vb))
-    }
-}
-
 pub(crate) mod fee_rate_f64_serde {
     use bitcoin::FeeRate;
     use serde::{Deserialize, Deserializer, Serializer};
