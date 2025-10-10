@@ -7,7 +7,7 @@ use url::Url;
 use crate::builder::MempoolClientBuilder;
 use crate::error::Error;
 use crate::response::{
-    AddressStats, BlockInfo, DifficultyAdjustment, FeeRecommendations, HashrateStats,
+    AddressStats, BlockInfo, BlockInfoV1, DifficultyAdjustment, FeeRecommendations, HashrateStats,
     MempoolBlockFees, MempoolStats, Prices,
 };
 #[cfg(feature = "ws")]
@@ -122,6 +122,16 @@ impl MempoolClient {
         let url: Url = self
             .url
             .join("/api/block/")?
+            .join(hash.to_string().as_str())?;
+        let response: Response = self.client.get(url).send().await?;
+        Ok(response.json().await?)
+    }
+
+    /// Get the block information (v1)
+    pub async fn get_block_v1(&self, hash: BlockHash) -> Result<BlockInfoV1, Error> {
+        let url: Url = self
+            .url
+            .join("/api/v1/block/")?
             .join(hash.to_string().as_str())?;
         let response: Response = self.client.get(url).send().await?;
         Ok(response.json().await?)

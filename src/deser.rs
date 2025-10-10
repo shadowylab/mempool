@@ -20,6 +20,30 @@ pub(crate) mod weight_serde {
     }
 }
 
+/// Serde module for optional Weight
+pub mod optional_weight_serde {
+    use bitcoin::Weight;
+    use serde::{Deserialize, Deserializer, Serializer};
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<Option<Weight>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let value: Option<u64> = Option::deserialize(deserializer)?;
+        Ok(value.map(Weight::from_wu))
+    }
+
+    pub fn serialize<S>(weight: &Option<Weight>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match weight {
+            Some(w) => serializer.serialize_some(&w.to_wu()),
+            None => serializer.serialize_none(),
+        }
+    }
+}
+
 pub(crate) mod fee_rate_u64_serde {
     use bitcoin::FeeRate;
     use serde::{Deserialize, Deserializer, Serializer};
