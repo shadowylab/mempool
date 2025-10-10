@@ -1,3 +1,5 @@
+use bitcoin::FeeRate;
+
 pub(crate) mod weight_serde {
     use bitcoin::Weight;
     use serde::{Deserialize, Deserializer, Serializer};
@@ -48,7 +50,7 @@ pub(crate) mod fee_rate_f64_serde {
         S: Serializer,
     {
         // Convert from sat/kwu to sat/vB
-        let sat_per_vb: f64 = fee_rate.to_sat_per_vb_ceil() as f64;
+        let sat_per_vb: f64 = super::fee_rate_to_f64_sat_vb(fee_rate);
         serializer.serialize_f64(sat_per_vb)
     }
 
@@ -57,7 +59,7 @@ pub(crate) mod fee_rate_f64_serde {
         D: Deserializer<'de>,
     {
         let sat_per_vb: f64 = f64::deserialize(deserializer)?;
-        Ok(FeeRate::from_sat_per_vb_unchecked(sat_per_vb as u64))
+        Ok(super::fee_rate_from_f64_sat_vb(sat_per_vb))
     }
 }
 
@@ -69,10 +71,7 @@ pub(crate) mod fee_rate_vec_serde {
     where
         S: Serializer,
     {
-        let fee_rates_f64: Vec<f64> = fee_rate
-            .iter()
-            .map(|fr| fr.to_sat_per_kwu() as f64 / 1000.0)
-            .collect();
+        let fee_rates_f64: Vec<f64> = fee_rate.iter().map(super::fee_rate_to_f64_sat_vb).collect();
 
         fee_rates_f64.serialize(serializer)
     }
@@ -85,10 +84,7 @@ pub(crate) mod fee_rate_vec_serde {
 
         let fee_rates = fee_rates_f64
             .into_iter()
-            .map(|sat_per_vb| {
-                let sat_per_kwu: u64 = (sat_per_vb * 1000.0) as u64;
-                FeeRate::from_sat_per_kwu(sat_per_kwu)
-            })
+            .map(super::fee_rate_from_f64_sat_vb)
             .collect();
 
         Ok(fee_rates)
@@ -134,4 +130,14 @@ pub(crate) mod fee_histogram_serde {
 
         Ok(histogram)
     }
+}
+
+#[inline]
+fn fee_rate_to_f64_sat_vb(fee_rate: &FeeRate) -> f64 {
+    fee_rate.to_sat_per_kwu() as f64 / 250.0
+}
+
+#[inline]
+fn fee_rate_from_f64_sat_vb(sat_per_vb: f64) -> FeeRate {
+    FeeRate::from_sat_per_kwu((sat_per_vb * 250.0).round() as u64)
 }

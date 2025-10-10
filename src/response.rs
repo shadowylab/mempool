@@ -481,11 +481,11 @@ mod tests {
         assert_eq!(block_fee.block_v_size, 746096.5);
         assert_eq!(block_fee.n_tx, 863);
         assert_eq!(block_fee.total_fees.to_sat(), 8875608);
-        assert_eq!(block_fee.median_fee.to_sat_per_vb_ceil(), 10);
+        assert_eq!(block_fee.median_fee.to_sat_per_vb_floor(), 10);
         assert_eq!(block_fee.fee_range.len(), 3);
-        assert_eq!(block_fee.fee_range[0].to_sat_per_kwu(), 1000);
-        assert_eq!(block_fee.fee_range[1].to_sat_per_kwu(), 2424);
-        assert_eq!(block_fee.fee_range[2].to_sat_per_kwu(), 8107);
+        assert_eq!(block_fee.fee_range[0].to_sat_per_vb_floor(), 1);
+        assert_eq!(block_fee.fee_range[1].to_sat_per_vb_floor(), 2);
+        assert_eq!(block_fee.fee_range[2].to_sat_per_vb_floor(), 8);
     }
 
     #[test]
