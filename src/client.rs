@@ -2,13 +2,14 @@
 
 use bitcoin::{Address, BlockHash};
 use reqwest::{Client, Response};
+use serde::de::DeserializeOwned;
 use url::Url;
 
 use crate::builder::MempoolClientBuilder;
 use crate::error::Error;
 use crate::response::{
     AddressStats, BlockInfo, BlockInfoV1, DifficultyAdjustment, FeeRecommendations, HashrateStats,
-    MempoolBlockFees, MempoolStats, Prices,
+    MempoolBlockFees, MempoolResponse, MempoolStats, Prices,
 };
 #[cfg(feature = "ws")]
 use crate::websocket::{self, MempoolSubscription, MempoolSubscriptionRequest};
@@ -86,18 +87,25 @@ impl MempoolClient {
         Self { client, url }
     }
 
+    async fn get_response<T>(&self, url: Url) -> Result<T, Error>
+    where
+        T: DeserializeOwned,
+    {
+        let response: Response = self.client.get(url).send().await?;
+        let response: MempoolResponse<T> = response.json().await?;
+        response.into_result()
+    }
+
     /// Get details about difficulty adjustment.
     pub async fn get_difficulty_adjustment(&self) -> Result<DifficultyAdjustment, Error> {
         let url: Url = self.url.join("/api/v1/difficulty-adjustment")?;
-        let response: Response = self.client.get(url).send().await?;
-        Ok(response.json().await?)
+        self.get_response(url).await
     }
 
     /// Get bitcoin latest price denominated in main currencies.
     pub async fn get_prices(&self) -> Result<Prices, Error> {
         let url: Url = self.url.join("/api/v1/prices")?;
-        let response: Response = self.client.get(url).send().await?;
-        Ok(response.json().await?)
+        self.get_response(url).await
     }
 
     /// Get details about an address.
@@ -106,15 +114,13 @@ impl MempoolClient {
             .url
             .join("/api/address/")?
             .join(address.to_string().as_str())?;
-        let response: Response = self.client.get(url).send().await?;
-        Ok(response.json().await?)
+        self.get_response(url).await
     }
 
     /// Get the height of the last block.
     pub async fn get_block_tip_height(&self) -> Result<u32, Error> {
         let url: Url = self.url.join("/api/blocks/tip/height")?;
-        let response: Response = self.client.get(url).send().await?;
-        Ok(response.json().await?)
+        self.get_response(url).await
     }
 
     /// Get the block information
@@ -123,8 +129,7 @@ impl MempoolClient {
             .url
             .join("/api/block/")?
             .join(hash.to_string().as_str())?;
-        let response: Response = self.client.get(url).send().await?;
-        Ok(response.json().await?)
+        self.get_response(url).await
     }
 
     /// Get the block information (v1)
@@ -133,8 +138,7 @@ impl MempoolClient {
             .url
             .join("/api/v1/block/")?
             .join(hash.to_string().as_str())?;
-        let response: Response = self.client.get(url).send().await?;
-        Ok(response.json().await?)
+        self.get_response(url).await
     }
 
     /// Get the details on the past 10 blocks.
@@ -148,8 +152,7 @@ impl MempoolClient {
             url = url.join(start_height.to_string().as_str())?;
         }
 
-        let response: Response = self.client.get(url).send().await?;
-        Ok(response.json().await?)
+        self.get_response(url).await
     }
 
     /// Get network-wide hashrate and difficulty figures over the last 3 days.
@@ -158,29 +161,25 @@ impl MempoolClient {
             .url
             .join("/api/v1/mining/hashrate/")?
             .join(period.as_str())?;
-        let response: Response = self.client.get(url).send().await?;
-        Ok(response.json().await?)
+        self.get_response(url).await
     }
 
     /// Get currently suggested fees for new transactions.
     pub async fn get_recommended_fees(&self) -> Result<FeeRecommendations, Error> {
         let url: Url = self.url.join("/api/v1/fees/recommended")?;
-        let response: Response = self.client.get(url).send().await?;
-        Ok(response.json().await?)
+        self.get_response(url).await
     }
 
     /// Get current mempool backlog statistics.
     pub async fn get_mempool(&self) -> Result<MempoolStats, Error> {
         let url: Url = self.url.join("/api/mempool")?;
-        let response: Response = self.client.get(url).send().await?;
-        Ok(response.json().await?)
+        self.get_response(url).await
     }
 
     /// Get current mempool as projected blocks.
     pub async fn get_mempool_blocks_fees(&self) -> Result<Vec<MempoolBlockFees>, Error> {
         let url: Url = self.url.join("/api/v1/fees/mempool-blocks")?;
-        let response: Response = self.client.get(url).send().await?;
-        Ok(response.json().await?)
+        self.get_response(url).await
     }
 
     /// Subscribe to mempool space websocket.

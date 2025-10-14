@@ -8,6 +8,28 @@ use bitcoin::{Amount, BlockHash, FeeRate, TxMerkleNode, Weight};
 use serde::{Deserialize, Serialize};
 
 use crate::deser;
+use crate::error::Error;
+
+#[derive(Debug, Deserialize)]
+pub(crate) struct ErrorResponse {
+    pub(crate) error: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(untagged)]
+pub(crate) enum MempoolResponse<T> {
+    Success(T),
+    Error(ErrorResponse),
+}
+
+impl<T> MempoolResponse<T> {
+    pub fn into_result(self) -> Result<T, Error> {
+        match self {
+            Self::Success(data) => Ok(data),
+            Self::Error(err) => Err(Error::Mempool(err.error)),
+        }
+    }
+}
 
 /// Prices
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]

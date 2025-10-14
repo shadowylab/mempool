@@ -11,6 +11,8 @@ pub enum Error {
     Url(ParseError),
     /// Reqwest error
     Reqwest(reqwest::Error),
+    /// Mempool response error
+    Mempool(String),
     /// Tungstenite error
     #[cfg(feature = "ws")]
     Tungstenite(tokio_tungstenite::tungstenite::Error),
@@ -32,6 +34,7 @@ impl fmt::Display for Error {
         match self {
             Self::Url(e) => write!(f, "{e}"),
             Self::Reqwest(e) => write!(f, "{e}"),
+            Self::Mempool(e) => write!(f, "{e}"),
             #[cfg(feature = "ws")]
             Self::Tungstenite(e) => write!(f, "{e}"),
             #[cfg(feature = "ws")]
