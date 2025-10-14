@@ -174,7 +174,8 @@ pub struct BlockExtras {
     pub avg_fee_rate: FeeRate,
     /// Raw coinbase transaction hex
     #[serde(rename = "coinbaseRaw")]
-    pub coinbase_raw: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub coinbase_raw: Option<String>,
     /// Coinbase output address
     #[serde(rename = "coinbaseAddress")]
     pub coinbase_address: Option<String>,
@@ -183,66 +184,86 @@ pub struct BlockExtras {
     pub coinbase_addresses: Option<Vec<String>>,
     /// Coinbase signature script
     #[serde(rename = "coinbaseSignature")]
-    pub coinbase_signature: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub coinbase_signature: Option<String>,
     /// Coinbase signature ASCII representation
     #[serde(rename = "coinbaseSignatureAscii")]
-    pub coinbase_signature_ascii: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub coinbase_signature_ascii: Option<String>,
     /// Average transaction size
     #[serde(rename = "avgTxSize")]
-    pub avg_tx_size: f64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub avg_tx_size: Option<f64>,
     /// Total number of inputs
     #[serde(rename = "totalInputs")]
-    pub total_inputs: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub total_inputs: Option<u32>,
     /// Total number of outputs
     #[serde(rename = "totalOutputs")]
-    pub total_outputs: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub total_outputs: Option<u32>,
     /// Total output amount
     #[serde(rename = "totalOutputAmt")]
-    pub total_output_amt: Amount,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub total_output_amt: Option<Amount>,
     /// Median fee amount
     #[serde(rename = "medianFeeAmt")]
-    pub median_fee_amt: Amount,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub median_fee_amt: Option<Amount>,
     /// Fee percentiles
     #[serde(rename = "feePercentiles")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub fee_percentiles: Option<Vec<Amount>>,
     /// Total SegWit transactions
     #[serde(rename = "segwitTotalTxs")]
-    pub segwit_total_txs: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub segwit_total_txs: Option<u32>,
     /// Total SegWit size
     #[serde(rename = "segwitTotalSize")]
-    pub segwit_total_size: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub segwit_total_size: Option<f32>,
     /// Total SegWit weight
     #[serde(rename = "segwitTotalWeight")]
-    #[serde(with = "deser::weight_serde")]
-    pub segwit_total_weight: Weight,
+    #[serde(with = "deser::optional_weight_serde")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub segwit_total_weight: Option<Weight>,
     /// Block header hex
-    pub header: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub header: Option<String>,
     /// UTXO set change
     #[serde(rename = "utxoSetChange")]
-    pub utxo_set_change: i32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub utxo_set_change: Option<i32>,
     /// UTXO set size
     #[serde(rename = "utxoSetSize")]
-    pub utxo_set_size: u64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub utxo_set_size: Option<f64>,
     /// Total input amount
     #[serde(rename = "totalInputAmt")]
-    pub total_input_amt: Amount,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub total_input_amt: Option<Amount>,
     /// Virtual size
     #[serde(rename = "virtualSize")]
-    pub virtual_size: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub virtual_size: Option<f64>,
     /// First seen timestamp
     #[serde(rename = "firstSeen")]
     pub first_seen: Option<u64>,
     /// Orphaned blocks
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub orphans: Option<Vec<String>>,
     /// Match rate
     #[serde(rename = "matchRate")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub match_rate: Option<f64>,
     /// Expected fees
     #[serde(rename = "expectedFees")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub expected_fees: Option<Amount>,
     /// Expected weight
     #[serde(rename = "expectedWeight")]
     #[serde(with = "deser::optional_weight_serde")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub expected_weight: Option<Weight>,
 }
 
@@ -666,16 +687,16 @@ mod tests {
                 },
                 avg_fee: Amount::from_sat(12068),
                 avg_fee_rate: FeeRate::from_sat_per_vb_unchecked(20),
-                coinbase_raw: "03668b050455940ee2ebbc03100000046d".to_string(),
+                coinbase_raw: Some("03668b050455940ee2ebbc03100000046d".to_string()),
                 coinbase_address: Some("17JJ3oZyF4ShQMGukDjpMWhmooCjEvoVVB".to_string()),
                 coinbase_addresses: Some(vec!["17JJ3oZyF4ShQMGukDjpMWhmooCjEvoVVB".to_string()]),
-                coinbase_signature: "OP_DUP OP_HASH160 OP_PUSHBYTES_20 45160ea9d45f6edefef3977ac0b2cdcc29aa594a OP_EQUALVERIFY OP_CHECKSIG".to_string(),
-                coinbase_signature_ascii: "...".to_string(),
-                avg_tx_size: 579.57,
-                total_inputs: 1424,
-                total_outputs: 1764,
-                total_output_amt: Amount::from_sat(531126071491),
-                median_fee_amt: Amount::from_sat(10000),
+                coinbase_signature: Some("OP_DUP OP_HASH160 OP_PUSHBYTES_20 45160ea9d45f6edefef3977ac0b2cdcc29aa594a OP_EQUALVERIFY OP_CHECKSIG".to_string()),
+                coinbase_signature_ascii: Some("...".to_string()),
+                avg_tx_size: Some(579.57),
+                total_inputs: Some(1424),
+                total_outputs: Some(1764),
+                total_output_amt: Some(Amount::from_sat(531126071491)),
+                median_fee_amt: Some(Amount::from_sat(10000)),
                 fee_percentiles: Some(vec![
                     Amount::from_sat(0),
                     Amount::from_sat(735),
@@ -685,14 +706,14 @@ mod tests {
                     Amount::from_sat(20000),
                     Amount::from_sat(300000),
                 ]),
-                segwit_total_txs: 0,
-                segwit_total_size: 0,
-                segwit_total_weight: Weight::from_wu(0),
-                header: "02000000ce0782217396e8f2e91e0b76a8a245cff7f13efab645c51000000000000000006c684bb0477609cbc986385c38fc628cce68f7d52e26b466e3ba5ef07bb83c9df30f94558e41161818426aac".to_string(),
-                utxo_set_change: 340,
-                utxo_set_size: 21180314,
-                total_input_amt: Amount::from_sat(531132021255),
-                virtual_size: 286494,
+                segwit_total_txs: Some(0),
+                segwit_total_size: Some(0.0),
+                segwit_total_weight: Some(Weight::from_wu(0)),
+                header: Some("02000000ce0782217396e8f2e91e0b76a8a245cff7f13efab645c51000000000000000006c684bb0477609cbc986385c38fc628cce68f7d52e26b466e3ba5ef07bb83c9df30f94558e41161818426aac".to_string()),
+                utxo_set_change: Some(340),
+                utxo_set_size: Some(21180314.0),
+                total_input_amt: Some(Amount::from_sat(531132021255)),
+                virtual_size: Some(286494.0),
                 first_seen: None,
                 orphans: Some(vec![]),
                 match_rate: None,
