@@ -9,7 +9,7 @@ use crate::builder::MempoolClientBuilder;
 use crate::error::Error;
 use crate::response::{
     AddressStats, BlockInfo, BlockInfoV1, DifficultyAdjustment, FeeRecommendations, HashrateStats,
-    HistoricalPrice, MempoolBlockFees, MempoolResponse, MempoolStats, Prices,
+    HistoricalPrices, MempoolBlockFees, MempoolResponse, MempoolStats, Prices,
 };
 #[cfg(feature = "ws")]
 use crate::websocket::{self, MempoolSubscription, MempoolSubscriptionRequest};
@@ -140,7 +140,7 @@ impl MempoolClient {
         &self,
         currency: Currency,
         timestamp: Option<u64>,
-    ) -> Result<HistoricalPrice, Error> {
+    ) -> Result<HistoricalPrices, Error> {
         let mut url: Url = self.url.join("/api/v1/historical-price")?;
 
         let mut query: String = format!("currency={}", currency.as_str());

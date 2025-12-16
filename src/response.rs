@@ -60,9 +60,9 @@ pub struct Prices {
     pub jpy: Option<f64>,
 }
 
-/// Historical price
+/// Historical prices
 #[derive(Debug, Clone, PartialEq, Deserialize)]
-pub struct HistoricalPrice {
+pub struct HistoricalPrices {
     /// Prices
     pub prices: Vec<Prices>,
     /// Exchange rates
@@ -913,10 +913,10 @@ mod tests {
 }
 "#;
 
-        let historical_price: HistoricalPrice = serde_json::from_str(json).unwrap();
+        let historical_price: HistoricalPrices = serde_json::from_str(json).unwrap();
         assert_eq!(
             historical_price,
-            HistoricalPrice {
+            HistoricalPrices {
                 prices: vec![Prices {
                     timestamp: 1499904000,
                     usd: 2254.9,
