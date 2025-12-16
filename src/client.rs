@@ -9,10 +9,37 @@ use crate::builder::MempoolClientBuilder;
 use crate::error::Error;
 use crate::response::{
     AddressStats, BlockInfo, BlockInfoV1, DifficultyAdjustment, FeeRecommendations, HashrateStats,
-    MempoolBlockFees, MempoolResponse, MempoolStats, Prices,
+    HistoricalPrice, MempoolBlockFees, MempoolResponse, MempoolStats, Prices,
 };
 #[cfg(feature = "ws")]
 use crate::websocket::{self, MempoolSubscription, MempoolSubscriptionRequest};
+
+/// Currency
+#[allow(missing_docs)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum Currency {
+    USD,
+    EUR,
+    GBP,
+    CAD,
+    CHF,
+    AUD,
+    JPY,
+}
+
+impl Currency {
+    fn as_str(&self) -> &str {
+        match self {
+            Self::USD => "USD",
+            Self::EUR => "EUR",
+            Self::GBP => "GBP",
+            Self::CAD => "CAD",
+            Self::CHF => "CHF",
+            Self::AUD => "AUD",
+            Self::JPY => "JPY",
+        }
+    }
+}
 
 /// Hashrate time period
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -105,6 +132,22 @@ impl MempoolClient {
     /// Get bitcoin latest price denominated in main currencies.
     pub async fn get_prices(&self) -> Result<Prices, Error> {
         let url: Url = self.url.join("/api/v1/prices")?;
+        self.get_response(url).await
+    }
+
+    /// Get historical price
+    pub async fn historical_price(
+        &self,
+        currency: Currency,
+        timestamp: u64,
+    ) -> Result<HistoricalPrice, Error> {
+        let mut url: Url = self.url.join("/api/v1/historical-price")?;
+
+        // Set query string
+        let query: String = format!("currency={}&timestamp={timestamp}", currency.as_str());
+        url.set_query(Some(&query));
+
+        // Get response
         self.get_response(url).await
     }
 

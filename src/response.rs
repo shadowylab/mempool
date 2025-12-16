@@ -1,7 +1,7 @@
 //! Responses
 
 use std::cmp::Ordering;
-use std::collections::BTreeSet;
+use std::collections::{BTreeSet, HashMap};
 
 use bitcoin::address::{Address, NetworkUnchecked};
 use bitcoin::{Amount, BlockHash, FeeRate, TxMerkleNode, Weight};
@@ -32,32 +32,42 @@ impl<T> MempoolResponse<T> {
 }
 
 /// Prices
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Deserialize)]
 pub struct Prices {
     /// Timestamp
     #[serde(rename = "time")]
     pub timestamp: u64,
     /// USD
     #[serde(rename = "USD")]
-    pub usd: u32,
+    pub usd: f64,
     /// EUR
     #[serde(rename = "EUR")]
-    pub eur: u32,
+    pub eur: Option<f64>,
     /// GBP
     #[serde(rename = "GBP")]
-    pub gbp: u32,
+    pub gbp: Option<f64>,
     /// CAD
     #[serde(rename = "CAD")]
-    pub cad: u32,
+    pub cad: Option<f64>,
     /// CHF
     #[serde(rename = "CHF")]
-    pub chf: u32,
+    pub chf: Option<f64>,
     /// AUD
     #[serde(rename = "AUD")]
-    pub aud: u32,
+    pub aud: Option<f64>,
     /// JPY
     #[serde(rename = "JPY")]
-    pub jpy: u32,
+    pub jpy: Option<f64>,
+}
+
+/// Historical price
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+pub struct HistoricalPrice {
+    /// Prices
+    pub prices: Vec<Prices>,
+    /// Exchange rates
+    #[serde(rename = "exchangeRates")]
+    pub rates: HashMap<String, f64>,
 }
 
 /// Bitcoin difficulty adjustment information
@@ -880,5 +890,52 @@ mod tests {
             ],
         };
         assert_eq!(stats.avg_fee_rate(), FeeRate::from_sat_per_vb_unchecked(10));
+    }
+
+    #[test]
+    fn test_historical_price_deserialization() {
+        let json = r#"{
+  "prices": [
+    {
+      "time": 1499904000,
+      "EUR": 1964,
+      "USD": 2254.9
+    }
+  ],
+  "exchangeRates": {
+    "USDEUR": 0.92,
+    "USDGBP": 0.78,
+    "USDCAD": 1.36,
+    "USDCHF": 0.89,
+    "USDAUD": 1.53,
+    "USDJPY": 149.48
+  }
+}
+"#;
+
+        let historical_price: HistoricalPrice = serde_json::from_str(json).unwrap();
+        assert_eq!(
+            historical_price,
+            HistoricalPrice {
+                prices: vec![Prices {
+                    timestamp: 1499904000,
+                    usd: 2254.9,
+                    eur: Some(1964.0),
+                    gbp: None,
+                    cad: None,
+                    chf: None,
+                    aud: None,
+                    jpy: None,
+                }],
+                rates: HashMap::from([
+                    ("USDEUR".to_string(), 0.92),
+                    ("USDGBP".to_string(), 0.78),
+                    ("USDCAD".to_string(), 1.36),
+                    ("USDCHF".to_string(), 0.89),
+                    ("USDAUD".to_string(), 1.53),
+                    ("USDJPY".to_string(), 149.48),
+                ]),
+            }
+        )
     }
 }
