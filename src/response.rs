@@ -1,7 +1,7 @@
 //! Responses
 
 use std::cmp::Ordering;
-use std::collections::{BTreeSet, HashMap};
+use std::collections::{BTreeMap, BTreeSet};
 
 use bitcoin::address::{Address, NetworkUnchecked};
 use bitcoin::{Amount, BlockHash, FeeRate, TxMerkleNode, Weight};
@@ -39,6 +39,46 @@ pub struct Prices {
     pub timestamp: u64,
     /// USD
     #[serde(rename = "USD")]
+    pub usd: u32,
+    /// EUR
+    #[serde(rename = "EUR")]
+    pub eur: u32,
+    /// GBP
+    #[serde(rename = "GBP")]
+    pub gbp: u32,
+    /// CAD
+    #[serde(rename = "CAD")]
+    pub cad: u32,
+    /// CHF
+    #[serde(rename = "CHF")]
+    pub chf: u32,
+    /// AUD
+    #[serde(rename = "AUD")]
+    pub aud: u32,
+    /// JPY
+    #[serde(rename = "JPY")]
+    pub jpy: u32,
+}
+
+/// Historical prices
+#[derive(Deserialize)]
+pub(super) struct HistoricalPricesDeser {
+    prices: Vec<HistoricalPricePoint>,
+}
+
+#[derive(Deserialize)]
+struct HistoricalPricePoint {
+    #[serde(rename = "time")]
+    timestamp: u64,
+    #[serde(flatten)]
+    price: HistoricalPrice,
+}
+
+/// Historical price
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Deserialize)]
+pub struct HistoricalPrice {
+    /// USD
+    #[serde(rename = "USD")]
     pub usd: f64,
     /// EUR
     #[serde(rename = "EUR")]
@@ -61,13 +101,16 @@ pub struct Prices {
 }
 
 /// Historical prices
-#[derive(Debug, Clone, PartialEq, Deserialize)]
-pub struct HistoricalPrices {
-    /// Prices
-    pub prices: Vec<Prices>,
-    /// Exchange rates
-    #[serde(rename = "exchangeRates")]
-    pub rates: HashMap<String, f64>,
+pub type HistoricalPrices = BTreeMap<u64, HistoricalPrice>;
+
+impl From<HistoricalPricesDeser> for HistoricalPrices {
+    fn from(deser: HistoricalPricesDeser) -> Self {
+        deser
+            .prices
+            .into_iter()
+            .map(|p| (p.timestamp, p.price))
+            .collect()
+    }
 }
 
 /// Bitcoin difficulty adjustment information
@@ -913,12 +956,13 @@ mod tests {
 }
 "#;
 
-        let historical_price: HistoricalPrices = serde_json::from_str(json).unwrap();
+        let historical_price: HistoricalPricesDeser = serde_json::from_str(json).unwrap();
+        let historical_price: HistoricalPrices = historical_price.into();
         assert_eq!(
             historical_price,
-            HistoricalPrices {
-                prices: vec![Prices {
-                    timestamp: 1499904000,
+            BTreeMap::from([(
+                1499904000,
+                HistoricalPrice {
                     usd: 2254.9,
                     eur: Some(1964.0),
                     gbp: None,
@@ -926,16 +970,8 @@ mod tests {
                     chf: None,
                     aud: None,
                     jpy: None,
-                }],
-                rates: HashMap::from([
-                    ("USDEUR".to_string(), 0.92),
-                    ("USDGBP".to_string(), 0.78),
-                    ("USDCAD".to_string(), 1.36),
-                    ("USDCHF".to_string(), 0.89),
-                    ("USDAUD".to_string(), 1.53),
-                    ("USDJPY".to_string(), 149.48),
-                ]),
-            }
+                }
+            )])
         )
     }
 }

@@ -9,7 +9,8 @@ use crate::builder::MempoolClientBuilder;
 use crate::error::Error;
 use crate::response::{
     AddressStats, BlockInfo, BlockInfoV1, DifficultyAdjustment, FeeRecommendations, HashrateStats,
-    HistoricalPrices, MempoolBlockFees, MempoolResponse, MempoolStats, Prices,
+    HistoricalPrices, HistoricalPricesDeser, MempoolBlockFees, MempoolResponse, MempoolStats,
+    Prices,
 };
 #[cfg(feature = "ws")]
 use crate::websocket::{self, MempoolSubscription, MempoolSubscriptionRequest};
@@ -151,7 +152,9 @@ impl MempoolClient {
 
         url.set_query(Some(&query));
 
-        self.get_response(url).await
+        let prices: HistoricalPricesDeser = self.get_response(url).await?;
+
+        Ok(prices.into())
     }
 
     /// Get details about an address.
