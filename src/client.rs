@@ -135,8 +135,8 @@ impl MempoolClient {
         self.get_response(url).await
     }
 
-    /// Get historical price
-    pub async fn historical_price(
+    /// Get historical prices
+    pub async fn historical_prices(
         &self,
         currency: Currency,
         timestamp: Option<u64>,
