@@ -139,18 +139,23 @@ impl MempoolClient {
     /// Get historical prices
     pub async fn historical_prices(
         &self,
-        currency: Currency,
+        currency: Option<Currency>,
         timestamp: Option<u64>,
     ) -> Result<HistoricalPrices, Error> {
         let mut url: Url = self.url.join("/api/v1/historical-price")?;
 
-        let mut query: String = format!("currency={}", currency.as_str());
+        // Build the query string
+        {
+            let mut qp = url.query_pairs_mut();
 
-        if let Some(timestamp) = timestamp {
-            query.push_str(&format!("&timestamp={timestamp}"));
+            if let Some(currency) = currency {
+                qp.append_pair("currency", currency.as_str());
+            }
+
+            if let Some(timestamp) = timestamp {
+                qp.append_pair("timestamp", &timestamp.to_string());
+            }
         }
-
-        url.set_query(Some(&query));
 
         let prices: HistoricalPricesDeser = self.get_response(url).await?;
 
