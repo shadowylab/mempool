@@ -510,12 +510,6 @@ pub struct MempoolStats {
 }
 
 impl MempoolStats {
-    /// Total size (MB) of all transactions in mempool
-    pub fn size_mb(&self) -> f64 {
-        let vbyte: u64 = self.vsize.to_vbytes_ceil();
-        vbyte as f64 / 1_000_000.0
-    }
-
     /// Calculate average fee rate
     pub fn avg_fee_rate(&self) -> FeeRate {
         if self.fee_histogram.is_empty() {
@@ -889,18 +883,6 @@ mod tests {
 
         // Should be close due to precision loss from float->int->float conversion
         assert!((converted_back - 8.687).abs() < 0.001);
-    }
-
-    #[test]
-    fn test_mempool_size_conversion_to_mb() {
-        let stats = MempoolStats {
-            count: 1,
-            vsize: Weight::from_vb_unchecked(2345565),
-            total_fee: Amount::from_sat(1000),
-            fee_histogram: vec![],
-        };
-
-        assert_eq!(stats.size_mb(), 2.345565);
     }
 
     #[test]
